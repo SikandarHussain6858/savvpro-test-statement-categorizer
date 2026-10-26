@@ -98,14 +98,14 @@ Include ~10 rows from the same scenarios above to test split-column parsing.
 
 ## Acceptance Criteria
 
-- [ ] `parse_csv` successfully parses `sample_statement.csv` → returns 33 `TransactionRaw` objects
-- [ ] `parse_csv` successfully parses `sample_statement_split.csv` → returns correct transactions with proper sign
-- [ ] Warnings are generated for skipped/malformed rows
-- [ ] Column names are matched case-insensitively and with trimmed whitespace
-- [ ] Each transaction has a unique auto-generated `id`
-- [ ] Empty rows and header-only files don't crash the parser
-- [ ] `ValueError` raised for CSV files missing required columns (no date or no description)
-- [ ] All sample data uses **fake data only** — no real people, no real bank statements
+- [x] `parse_csv` successfully parses `sample_statement.csv` → returns 33 `TransactionRaw` objects
+- [x] `parse_csv` successfully parses `sample_statement_split.csv` → returns correct transactions with proper sign
+- [x] Warnings are generated for skipped/malformed rows
+- [x] Column names are matched case-insensitively and with trimmed whitespace
+- [x] Each transaction has a unique auto-generated `id`
+- [x] Empty rows and header-only files don't crash the parser
+- [x] `ValueError` raised for CSV files missing required columns (no date or no description)
+- [x] All sample data uses **fake data only** — no real people, no real bank statements
 
 ## Git Commit
 ```bash
