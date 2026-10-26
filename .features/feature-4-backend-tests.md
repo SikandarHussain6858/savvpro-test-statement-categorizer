@@ -147,12 +147,12 @@ client = TestClient(app)
 
 ## Acceptance Criteria
 
-- [ ] `cd backend && python -m pytest tests/ -v` passes all tests
-- [ ] Minimum **25 test cases** across all test files
-- [ ] Every brain module (sanitizer, direction, classifier, tax_summary) has at least 5 test cases
-- [ ] Parser tests cover standard format, split format, edge cases, and error cases
-- [ ] API tests cover all 4 endpoints including error responses
-- [ ] No tests rely on external services or network calls
+- [x] `cd backend && python -m pytest tests/ -v` passes all tests
+- [x] Minimum **25 test cases** across all test files
+- [x] Every brain module (sanitizer, direction, classifier, tax_summary) has at least 5 test cases
+- [x] Parser tests cover standard format, split format, edge cases, and error cases
+- [x] API tests cover all 4 endpoints including error responses
+- [x] No tests rely on external services or network calls
 
 ## Verification
 ```bash

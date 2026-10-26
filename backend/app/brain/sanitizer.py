@@ -21,10 +21,6 @@ POS_PREFIX_PATTERNS = [
     r"^SQ\s*\*\s*",
     r"^TST\s*\*\s*",
     r"^PAYPAL\s*\*\s*",
-    r"^AMZN\s+MKTP\s+(?:US\s*)?\*\s*",
-    r"^AMZN\s+MKTP\s+",
-    r"^APL\s*\*\s*",
-    r"^GOOGLE\s*\*\s*",
     r"^PY\s*\*\s*",
 ]
 
@@ -40,7 +36,9 @@ NOISE_PATTERNS = [
     r"#\s*\d+\b",
     r"\bSTORE\s*(?:#\s*)?\d+\b",
     r"\bNO\.?\s*\d+\b",
-    # Trailing transaction ID codes like 2X91K3, 9XK8 (alphanumeric 4-10 chars with digits)
+    # Long numeric IDs or ticket numbers (e.g. Delta 0062839201842)
+    r"\b\d{8,18}\b",
+    # Trailing transaction ID codes like 2X91K3, 9XK8 (alphanumeric 4-12 chars with digits)
     r"\b(?=[A-Z0-9]*[0-9])(?=[A-Z0-9]*[A-Z])[A-Z0-9]{4,12}\b",
     # Dates: MM/DD/YYYY or MM/DD or MM-DD
     r"\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b",
@@ -48,6 +46,8 @@ NOISE_PATTERNS = [
     r"https?://\S+",
     r"www\.\S+",
     r"\.(?:COM|IO|NET|ORG|CO|DEV|AI|APP|US|BIZ|TECH)\b",
+    # Marketplace noise suffix
+    r"\bMKTP\b",
     # Common trip/ride indicators
     r"\*TRIP\b",
     r"\*ORDER\b",
@@ -74,6 +74,7 @@ MAJOR_CITIES = [
 # Abbreviation expansions
 ABBREVIATIONS = {
     r"\bAMZN\b": "AMAZON",
+    r"\bAMAZON\s+MKTP\b": "AMAZON",
     r"\bAPL\b": "APPLE",
     r"\bMSFT\b": "MICROSOFT",
     r"\bGOOG\b": "GOOGLE",
@@ -91,15 +92,15 @@ def sanitize_merchant(raw_text: str) -> str:
     Sanitize and clean a raw bank description into a clean, canonical merchant name.
     
     Steps:
-    1. Uppercase & strip whitespace.
-    2. Repeatedly strip known POS/aggregator prefixes.
-    3. Strip noise patterns (store numbers, phone numbers, transaction IDs, URLs).
-    4. Strip major city and state location suffixes.
-    5. Expand standard abbreviations.
-    6. Normalize whitespace and punctuation.
+    1. Validate non-empty text (return "UNKNOWN" for empty/whitespace).
+    2. Repeatedly strip known POS/aggregator prefixes (SQ *, TST*, CHECKCARD).
+    3. Expand standard abbreviations early (AMZN -> AMAZON, APL -> APPLE).
+    4. Strip noise patterns (store numbers, ticket numbers, transaction IDs, URLs).
+    5. Strip major city and state location suffixes.
+    6. Normalize whitespace and boundary punctuation.
     7. Fall back to raw uppercased if result is empty.
     """
-    if not raw_text or not isinstance(raw_text, str):
+    if not raw_text or not isinstance(raw_text, str) or not raw_text.strip():
         return "UNKNOWN"
 
     cleaned = raw_text.strip().upper()
@@ -123,11 +124,9 @@ def sanitize_merchant(raw_text: str) -> str:
 
     # 4. Remove location suffixes (cities and states)
     for city in MAJOR_CITIES:
-        # Match city at boundary or near end
         cleaned = re.sub(rf"\b{re.escape(city)}\b", " ", cleaned, flags=re.IGNORECASE)
 
     for state in US_STATES:
-        # Match state code if isolated near end or surrounded by spaces
         cleaned = re.sub(rf"\b{state}\b(?:\s+USA|\s+US)?$", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(rf"\b{state}\b", " ", cleaned, flags=re.IGNORECASE)
 
@@ -142,8 +141,9 @@ def sanitize_merchant(raw_text: str) -> str:
 
     # 6. Fallback if empty or single character
     if len(cleaned) < 2:
-        # Fall back to raw but stripped of common prefixes
         fallback = re.sub(r"^(?:CHECKCARD|POS PURCHASE|SQ \*|TST\*)\s*", "", original_raw).strip()
-        return fallback if len(fallback) >= 2 else original_raw
+        if len(fallback) >= 2:
+            return fallback
+        return original_raw if original_raw.strip() else "UNKNOWN"
 
     return cleaned
