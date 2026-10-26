@@ -56,14 +56,14 @@ FastAPI application with:
 
 ## Acceptance Criteria
 
-- [ ] `uvicorn app.main:app --reload` starts successfully on port 8000
-- [ ] `POST /api/upload` with `sample_statement.csv` returns 200 with all transactions categorized
-- [ ] `POST /api/upload` with a `.txt` file returns 400 error
-- [ ] `POST /api/recalculate` with edited transactions returns updated tax summary
-- [ ] `GET /api/categories` returns all 13 category entries
-- [ ] `GET /api/sample` returns the demo data fully categorized
-- [ ] CORS headers allow requests from `localhost:5173`
-- [ ] Swagger docs available at `http://localhost:8000/docs`
+- [x] `uvicorn app.main:app --reload` starts successfully on port 8000
+- [x] `POST /api/upload` with `sample_statement.csv` returns 200 with all transactions categorized
+- [x] `POST /api/upload` with a `.txt` file returns 400 error
+- [x] `POST /api/recalculate` with edited transactions returns updated tax summary
+- [x] `GET /api/categories` returns all 13 category entries
+- [x] `GET /api/sample` returns the demo data fully categorized
+- [x] CORS headers allow requests from `localhost:5173`
+- [x] Swagger docs available at `http://localhost:8000/docs`
 
 ## Verification
 ```bash
