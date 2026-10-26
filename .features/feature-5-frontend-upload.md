@@ -139,17 +139,17 @@ The upload screen should feel premium and welcoming:
 
 ## Acceptance Criteria
 
-- [ ] `cd frontend && npm run dev` starts on port 5173
-- [ ] Upload dropzone renders with drag-and-drop support
-- [ ] Clicking the zone opens file picker (filtered to `.csv`)
-- [ ] Dragging a CSV file over the zone changes its visual state
-- [ ] Dropping a valid CSV triggers upload to backend and returns data
-- [ ] "Try Demo Data" button loads sample data from backend
-- [ ] Loading spinner shows during API calls
-- [ ] Error messages display for invalid files or API failures
-- [ ] After successful upload, the app transitions to show transaction count
-- [ ] "Upload New" button resets back to upload screen
-- [ ] Design is dark-themed, uses Inter font, and feels premium
+- [x] `cd frontend && npm run dev` starts on port 5173
+- [x] Upload dropzone renders with drag-and-drop support
+- [x] Clicking the zone opens file picker (filtered to `.csv`)
+- [x] Dragging a CSV file over the zone changes its visual state
+- [x] Dropping a valid CSV triggers upload to backend and returns data
+- [x] "Try Demo Data" button loads sample data from backend
+- [x] Loading spinner shows during API calls
+- [x] Error messages display for invalid files or API failures
+- [x] After successful upload, the app transitions to show transaction count
+- [x] "Upload New" button resets back to upload screen
+- [x] Design is glassy frosted, clean architectural corners (zero dark neon/AI bubble clichés)
 
 ## Verification
 ```bash
