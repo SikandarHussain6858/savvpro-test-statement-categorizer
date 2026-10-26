@@ -183,7 +183,7 @@ export default function FileUpload({ onUploadComplete, onError }) {
 
       {/* Main Frosted Dropzone Card */}
       <div
-        className={`glass-card dropzone ${isDragging ? 'dragging' : ''}`}
+        className={`dropzone-container ${isDragging ? 'dragging' : ''}`}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -196,7 +196,6 @@ export default function FileUpload({ onUploadComplete, onError }) {
             fileInputRef.current?.click();
           }
         }}
-        style={{ padding: '42px 28px' }}
       >
         <input
           ref={fileInputRef}
@@ -206,11 +205,12 @@ export default function FileUpload({ onUploadComplete, onError }) {
           style={{ display: 'none' }}
         />
 
-        <div className="dropzone-icon" style={{ background: 'var(--accent-purple-soft)', color: 'var(--accent-purple)' }}>
+        {/* Floating Upload Icon */}
+        <div className="dropzone-icon-circle">
           {isLoading ? (
-            <div className="spinner" style={{ borderTopColor: 'var(--accent-purple)' }} />
+            <div className="spinner" style={{ width: '28px', height: '28px', borderTopColor: 'var(--accent-purple)' }} />
           ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" y1="3" x2="12" y2="15" />
@@ -218,51 +218,62 @@ export default function FileUpload({ onUploadComplete, onError }) {
           )}
         </div>
 
-        <div className="dropzone-main-text" style={{ fontSize: '16px', fontWeight: 700 }}>
+        <div className="dropzone-heading">
           {isLoading ? loadingAction : 'Drag and drop your statement CSV here'}
         </div>
 
-        <div className="dropzone-sub-text" style={{ fontSize: '13px', marginBottom: '22px' }}>
-          {isLoading ? 'Processing transactions through classification rules...' : 'or browse a file from your computer'}
+        <div className="dropzone-subheading">
+          {isLoading
+            ? 'Running multi-column CSV parser and Schedule C categorization engine...'
+            : 'Compatible with standard bank exports, credit card statements, and split-column CSVs'}
         </div>
 
-        <div className="dropzone-actions" onClick={(e) => e.stopPropagation()}>
+        <div className="dropzone-actions-wrap" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
-            className="btn-pill-primary"
+            className="btn-upload-browse"
             disabled={isLoading}
             onClick={() => fileInputRef.current?.click()}
-            style={{ padding: '10px 24px', fontSize: '14px' }}
           >
-            Select CSV File
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Browse CSV File</span>
           </button>
         </div>
 
-        <div className="dropzone-divider">OR</div>
+        <div className="dropzone-divider-line">
+          <span>OR</span>
+        </div>
 
         {/* Prominent Demo Button */}
         <div onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
-            className="btn-pill-block"
+            className="btn-demo-card"
             disabled={isLoading}
             onClick={handleDemoClick}
-            style={{
-              maxWidth: '380px',
-              margin: '0 auto',
-              padding: '12px 20px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              background: '#ffffff',
-              color: 'var(--accent-purple)',
-              borderColor: 'var(--accent-purple-soft)',
-            }}
           >
-            <span style={{ fontSize: '16px' }}>✨</span>
+            <span className="demo-sparkle">✨</span>
             <span>Launch Interactive Demo (33 Sample Transactions)</span>
+            <span className="btn-demo-badge">Instant</span>
           </button>
+        </div>
+
+        {/* Dropzone Footer Specs */}
+        <div className="dropzone-footer-specs">
+          <span className="dropzone-spec-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Auto-detects Column Formats</span>
+          </span>
+          <span className="dropzone-spec-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>50% Meal Rule & Refunds</span>
+          </span>
+          <span className="dropzone-spec-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Deterministic Audit Trail</span>
+          </span>
         </div>
       </div>
 
