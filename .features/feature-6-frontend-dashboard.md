@@ -168,19 +168,19 @@ Render (when data loaded):
 
 ## Acceptance Criteria
 
-- [ ] Dashboard shows 4 summary cards with correct values from sample data
-- [ ] Category chart renders all categories with proportional bars
-- [ ] Filter pills work: clicking "Needs Review" shows only flagged rows
-- [ ] Transaction table shows all columns with correct formatting
-- [ ] Amount column color-coded (red/green/gray) by direction
-- [ ] Confidence badges color-coded (green/yellow/red) by threshold
-- [ ] Clicking a row expands to show decision details
-- [ ] Category dropdown appears on "Needs Review" rows
-- [ ] Changing a category triggers recalculation and updates dashboard
-- [ ] After manual approval, row status changes to ✅ and recalculation fires
-- [ ] Export CSV button downloads a valid CSV file
-- [ ] "Upload New" resets back to upload screen
-- [ ] Parser warnings (if any) display as dismissible banner
+- [x] Dashboard shows 4 summary cards with correct values from sample data
+- [x] Category chart renders all categories with proportional bars
+- [x] Filter pills work: clicking "Needs Review" shows only flagged rows
+- [x] Transaction table shows all columns with correct formatting
+- [x] Amount column color-coded (red/green/gray) by direction
+- [x] Confidence badges color-coded (green/yellow/red) by threshold
+- [x] Clicking a row expands to show decision details
+- [x] Category dropdown appears on "Needs Review" rows
+- [x] Changing a category triggers recalculation and updates dashboard
+- [x] After manual approval, row status changes to ✅ and recalculation fires
+- [x] Export CSV button downloads a valid CSV file
+- [x] "Upload New" resets back to upload screen
+- [x] Parser warnings (if any) display as dismissible banner
 
 ## Verification
 Run both backend and frontend, upload sample data or click "Try Demo", verify:
