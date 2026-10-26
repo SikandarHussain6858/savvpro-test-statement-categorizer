@@ -144,16 +144,16 @@ Logic:
 
 ## Acceptance Criteria
 
-- [ ] All files created and importable: `from app.brain import StatementBrain`
-- [ ] `sanitize_merchant("CHECKCARD POS PURCHASE SQ *GITHUB #1042 SAN FRANCISCO CA")` returns `"GITHUB"`
-- [ ] A refund transaction with "REFUND" keyword returns `direction=REFUND`
-- [ ] `TRANSFER TO SAVINGS` returns `direction=TRANSFER`, category `Transfers & Non-Taxable`
-- [ ] `GITHUB` returns `category="Software & Subscriptions"`, `confidence≥0.95`, `needs_review=False`
-- [ ] `AMAZON` returns `category="Office Supplies & Books"`, `needs_review=True`
-- [ ] `JOES CAFE 9921` returns `category="Meals & Client Entertainment"`, `needs_review=True`
-- [ ] An unrecognized vendor returns `category="Needs Review"`, `confidence=0.25`
-- [ ] Tax summary correctly applies 50% deductibility to meals
-- [ ] Tax summary treats refunds as expense reductions (not income)
+- [x] All files created and importable: `from app.brain import StatementBrain`
+- [x] `sanitize_merchant("CHECKCARD POS PURCHASE SQ *GITHUB #1042 SAN FRANCISCO CA")` returns `"GITHUB"`
+- [x] A refund transaction with "REFUND" keyword returns `direction=REFUND`
+- [x] `TRANSFER TO SAVINGS` returns `direction=TRANSFER`, category `Transfers & Non-Taxable`
+- [x] `GITHUB` returns `category="Software & Subscriptions"`, `confidence≥0.95`, `needs_review=False`
+- [x] `AMAZON` returns `category="Office Supplies & Books"`, `needs_review=True`
+- [x] `JOES CAFE 9921` returns `category="Meals & Client Entertainment"`, `needs_review=True`
+- [x] An unrecognized vendor returns `category="Needs Review"`, `confidence=0.25`
+- [x] Tax summary correctly applies 50% deductibility to meals
+- [x] Tax summary treats refunds as expense reductions (not income)
 
 ## Git Commit
 ```bash
