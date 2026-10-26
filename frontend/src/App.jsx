@@ -29,6 +29,7 @@ export default function App() {
     setSummary(data.summary || null);
     setWarnings(data.warnings || []);
     setActiveFilter('all');
+    setActiveTab('Dashboard');
   };
 
   const handleReset = () => {
@@ -37,6 +38,7 @@ export default function App() {
     setSummary(null);
     setWarnings([]);
     setActiveFilter('all');
+    setActiveTab('Dashboard');
   };
 
   const handleTransactionsUpdate = async (updatedTxList) => {
@@ -46,6 +48,28 @@ export default function App() {
       setSummary(newSummary);
     } catch (err) {
       console.error('Recalculation error:', err);
+    }
+  };
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId === 'Needs Review') {
+      setActiveFilter('needs_review');
+    } else if (tabId === 'Deductions') {
+      setActiveFilter('deductions');
+    } else {
+      setActiveFilter('all');
+    }
+  };
+
+  const handleFilterChange = (filterVal) => {
+    setActiveFilter(filterVal);
+    if (filterVal === 'needs_review') {
+      setActiveTab('Needs Review');
+    } else if (filterVal === 'deductions') {
+      setActiveTab('Deductions');
+    } else if (filterVal === 'all') {
+      setActiveTab('Dashboard');
     }
   };
 
@@ -109,9 +133,11 @@ export default function App() {
       {/* Top Application Bar matching reference */}
       <TopNavbar
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         onReset={handleReset}
         hasData={Boolean(statementData)}
+        needsReviewCount={needsReviewCount}
+        onExportCsv={handleExportCsv}
       />
 
       {!statementData ? (
@@ -156,7 +182,7 @@ export default function App() {
               <CategoryFilter
                 categories={activeCategoryNames}
                 activeFilter={activeFilter}
-                onFilterChange={setActiveFilter}
+                onFilterChange={handleFilterChange}
                 needsReviewCount={needsReviewCount}
                 totalCount={transactions.length}
               />

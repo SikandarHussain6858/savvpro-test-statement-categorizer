@@ -71,7 +71,7 @@ export default function FileUpload({ onUploadComplete, onError }) {
     e.stopPropagation();
     setLocalError(null);
     setIsLoading(true);
-    setLoadingAction('Loading freelance sample data...');
+    setLoadingAction('Loading freelance sample statement (33 transactions)...');
 
     try {
       const result = await loadSampleData();
@@ -85,19 +85,105 @@ export default function FileUpload({ onUploadComplete, onError }) {
     }
   };
 
+  const supportedBanks = [
+    'Chase Bank', 'Bank of America', 'Wells Fargo', 'American Express',
+    'Capital One', 'Silicon Valley Bank', 'Stripe Payouts', 'Upwork'
+  ];
+
   return (
-    <div className="upload-hero">
-      <div className="hero-text">
-        <span className="hero-badge">IRS Schedule C Categorizer</span>
-        <h1 className="hero-title">Automate Statement Deductions</h1>
-        <p className="hero-subtitle">
-          Import checking or credit card statements to automatically identify deductible
-          business software, home office utilities, and travel expenses.
+    <div style={{ maxWidth: '860px', margin: '40px auto 60px', padding: '0 20px' }}>
+      {/* Front Page Hero Header */}
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '5px 14px',
+            borderRadius: 'var(--radius-pill)',
+            background: 'var(--accent-purple-soft)',
+            color: 'var(--accent-purple)',
+            fontSize: '11px',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+            marginBottom: '14px',
+          }}
+        >
+          <span>IRS Schedule C Intelligence Engine</span>
+        </div>
+
+        <h1
+          style={{
+            fontSize: '34px',
+            fontWeight: 800,
+            letterSpacing: '-0.03em',
+            color: 'var(--text-main)',
+            marginBottom: '12px',
+            lineHeight: 1.2,
+          }}
+        >
+          Automated Bank Statement Categorizer
+        </h1>
+
+        <p
+          style={{
+            fontSize: '15px',
+            color: 'var(--text-sub)',
+            maxWidth: '640px',
+            margin: '0 auto 24px',
+            lineHeight: 1.6,
+          }}
+        >
+          Instantly classify messy bank and credit card CSVs into audit-proof tax categories.
+          Applies the 50% IRS meals rule, isolates non-taxable transfers, and calculates net taxable profit.
         </p>
+
+        {/* 3 Frosted Feature Highlights */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '14px',
+            textAlign: 'left',
+            marginBottom: '28px',
+          }}
+        >
+          <div className="glass-card" style={{ padding: '16px 18px' }}>
+            <div style={{ fontSize: '20px', marginBottom: '6px' }}>⚡</div>
+            <strong style={{ fontSize: '13px', display: 'block', color: 'var(--text-main)', marginBottom: '3px' }}>
+              100% Deterministic
+            </strong>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Zero AI hallucinations. Governed by 3-tier rules with audit trails.
+            </span>
+          </div>
+
+          <div className="glass-card" style={{ padding: '16px 18px' }}>
+            <div style={{ fontSize: '20px', marginBottom: '6px' }}>🛡️</div>
+            <strong style={{ fontSize: '13px', display: 'block', color: 'var(--text-main)', marginBottom: '3px' }}>
+              IRS Rules Built-In
+            </strong>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Automatic 50% business meal write-offs and refund expense offsets.
+            </span>
+          </div>
+
+          <div className="glass-card" style={{ padding: '16px 18px' }}>
+            <div style={{ fontSize: '20px', marginBottom: '6px' }}>💳</div>
+            <strong style={{ fontSize: '13px', display: 'block', color: 'var(--text-main)', marginBottom: '3px' }}>
+              Multi-Format Parser
+            </strong>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Handles split debit/credit columns, custom delimiters, and raw POS noise.
+            </span>
+          </div>
+        </div>
       </div>
 
+      {/* Main Frosted Dropzone Card */}
       <div
-        className={`dropzone ${isDragging ? 'dragging' : ''}`}
+        className={`glass-card dropzone ${isDragging ? 'dragging' : ''}`}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -110,6 +196,7 @@ export default function FileUpload({ onUploadComplete, onError }) {
             fileInputRef.current?.click();
           }
         }}
+        style={{ padding: '42px 28px' }}
       >
         <input
           ref={fileInputRef}
@@ -119,20 +206,11 @@ export default function FileUpload({ onUploadComplete, onError }) {
           style={{ display: 'none' }}
         />
 
-        <div className="dropzone-icon">
+        <div className="dropzone-icon" style={{ background: 'var(--accent-purple-soft)', color: 'var(--accent-purple)' }}>
           {isLoading ? (
-            <div className="spinner" />
+            <div className="spinner" style={{ borderTopColor: 'var(--accent-purple)' }} />
           ) : (
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" y1="3" x2="12" y2="15" />
@@ -140,19 +218,21 @@ export default function FileUpload({ onUploadComplete, onError }) {
           )}
         </div>
 
-        <div className="dropzone-main-text">
+        <div className="dropzone-main-text" style={{ fontSize: '16px', fontWeight: 700 }}>
           {isLoading ? loadingAction : 'Drag and drop your statement CSV here'}
         </div>
-        <div className="dropzone-sub-text">
-          {isLoading ? 'Running 3-tier tax rules engine...' : 'or click to browse from your computer'}
+
+        <div className="dropzone-sub-text" style={{ fontSize: '13px', marginBottom: '22px' }}>
+          {isLoading ? 'Processing transactions through classification rules...' : 'or browse a file from your computer'}
         </div>
 
         <div className="dropzone-actions" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
-            className="btn btn-primary"
+            className="btn-pill-primary"
             disabled={isLoading}
             onClick={() => fileInputRef.current?.click()}
+            style={{ padding: '10px 24px', fontSize: '14px' }}
           >
             Select CSV File
           </button>
@@ -160,49 +240,55 @@ export default function FileUpload({ onUploadComplete, onError }) {
 
         <div className="dropzone-divider">OR</div>
 
+        {/* Prominent Demo Button */}
         <div onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
-            className="btn btn-glass"
+            className="btn-pill-block"
             disabled={isLoading}
             onClick={handleDemoClick}
+            style={{
+              maxWidth: '380px',
+              margin: '0 auto',
+              padding: '12px 20px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              background: '#ffffff',
+              color: 'var(--accent-purple)',
+              borderColor: 'var(--accent-purple-soft)',
+            }}
           >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-            Explore Interactive Demo (33 Transactions)
+            <span style={{ fontSize: '16px' }}>✨</span>
+            <span>Launch Interactive Demo (33 Sample Transactions)</span>
           </button>
         </div>
       </div>
 
       {localError && (
-        <div className="error-banner">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
-          <span>{localError}</span>
+        <div className="error-banner" style={{ marginTop: '18px' }}>
+          <span>⚠️ {localError}</span>
         </div>
       )}
+
+      {/* Supported Bank Formats Footer */}
+      <div style={{ marginTop: '32px', textAlign: 'center' }}>
+        <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
+          Compatible with major business bank & payment exports:
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
+          {supportedBanks.map((bank) => (
+            <span
+              key={bank}
+              className="pill-badge pill-slate"
+              style={{ fontSize: '11px', padding: '4px 10px', background: 'rgba(255, 255, 255, 0.7)' }}
+            >
+              {bank}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

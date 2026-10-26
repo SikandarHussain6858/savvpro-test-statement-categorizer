@@ -26,7 +26,8 @@ export default function TransactionTable({
     return transactions.filter((t) => {
       // Category filter
       if (filter === 'needs_review' && !t.needs_review) return false;
-      if (filter !== 'all' && filter !== 'needs_review' && t.category !== filter) return false;
+      if (filter === 'deductions' && (!t.tax_deductible || t.direction !== 'OUTFLOW')) return false;
+      if (filter !== 'all' && filter !== 'needs_review' && filter !== 'deductions' && t.category !== filter) return false;
 
       // Search query
       if (searchQuery.trim()) {
