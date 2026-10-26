@@ -3,77 +3,79 @@ import React from 'react';
 export default function TaxDashboard({ summary, needsReviewCount }) {
   if (!summary) return null;
 
-  const totalExpenses = summary.total_expenses || 0;
+  const grossIncome = summary.gross_income || 0;
   const totalDeductible = summary.total_deductible_expenses || 0;
-  const taxSavings = summary.estimated_tax_savings || 0;
   const reviewCount = needsReviewCount ?? summary.needs_review_count ?? 0;
-  const reviewAmount = summary.needs_review_amount || 0;
+  const activeCategoriesCount = (summary.categories || []).filter((c) => c.transaction_count > 0).length;
 
   const formatCurrency = (val) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      minimumFractionDigits: 2,
+      maximumFractionDigits: 0,
     }).format(val || 0);
   };
 
-  const isUrgentReview = reviewCount > 5;
-
   return (
-    <section aria-label="Tax Summary Dashboard">
-      <div className="metrics-grid">
-        {/* Total Expenses */}
-        <div className="glass-panel metric-card card-expenses">
-          <div className="metric-label">Total Expenses</div>
-          <div className="metric-value mono-num">{formatCurrency(totalExpenses)}</div>
-          <div className="metric-sub">Net of vendor refunds & credits</div>
-        </div>
-
-        {/* Tax Deductible Expenses */}
-        <div className="glass-panel metric-card card-deductible">
-          <div className="metric-label">Tax Deductible</div>
-          <div className="metric-value mono-num">{formatCurrency(totalDeductible)}</div>
-          <div className="metric-sub">Verified Schedule C write-offs (meals @ 50%)</div>
-        </div>
-
-        {/* Estimated Tax Savings */}
-        <div className="glass-panel metric-card card-savings">
-          <div className="metric-label">Est. Tax Savings</div>
-          <div className="metric-value mono-num">{formatCurrency(taxSavings)}</div>
-          <div className="metric-sub">Calculated at 28% self-employed rate</div>
-        </div>
-
-        {/* Needs Review Card */}
-        <div className={`glass-panel metric-card ${isUrgentReview ? 'card-review-urgent' : 'card-review'}`}>
-          <div className="metric-label">Needs Review</div>
-          <div className="metric-value mono-num">
-            {reviewCount} <span style={{ fontSize: '15px', fontWeight: 500 }}>({formatCurrency(reviewAmount)})</span>
+    <section aria-label="Key Performance Indicators" className="metrics-row-4">
+      {/* Card 1: Gross Income / Bank Inflow */}
+      <div className="glass-card metric-stat-card">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="metric-icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <line x1="2" y1="10" x2="22" y2="10" />
+            </svg>
           </div>
-          <div className="metric-sub">
-            {reviewCount === 0 ? 'All transactions verified' : 'Requires confirmation or manual assignment'}
-          </div>
+          <button
+            type="button"
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '18px' }}
+            title="Options"
+          >
+            ⋮
+          </button>
         </div>
+        <div className="metric-number-bold mono-num">{formatCurrency(grossIncome)}</div>
+        <div className="metric-label-sub">Gross business revenue</div>
       </div>
 
-      {/* Secondary Financial Ledger Info */}
-      <div className="sub-metrics-bar">
-        <div className="sub-metric-item">
-          <span className="sub-metric-dot" style={{ background: 'var(--accent-income)' }} />
-          <span>Gross Business Revenue:</span>
-          <strong className="mono-num">{formatCurrency(summary.gross_income)}</strong>
+      {/* Card 2: Uncategorized / Needs Review */}
+      <div className="glass-card metric-stat-card">
+        <div className="metric-icon-wrap metric-icon-purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
         </div>
+        <div className="metric-number-bold mono-num">{reviewCount}</div>
+        <div className="metric-label-sub">Uncategorized transactions</div>
+      </div>
 
-        <div className="sub-metric-item">
-          <span className="sub-metric-dot" style={{ background: 'var(--primary)' }} />
-          <span>Net Taxable Profit:</span>
-          <strong className="mono-num">{formatCurrency(summary.net_taxable_profit)}</strong>
+      {/* Card 3: Verified Tax Categories */}
+      <div className="glass-card metric-stat-card">
+        <div className="metric-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
         </div>
+        <div className="metric-number-bold mono-num">{activeCategoriesCount}</div>
+        <div className="metric-label-sub">Active tax categories</div>
+      </div>
 
-        <div className="sub-metric-item">
-          <span className="sub-metric-dot" style={{ background: 'var(--text-muted)' }} />
-          <span>Non-Taxable Transfers:</span>
-          <strong className="mono-num">{formatCurrency(summary.non_taxable_transfers)}</strong>
+      {/* Card 4: Tax Deductible Spending */}
+      <div className="glass-card metric-stat-card">
+        <div className="metric-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
         </div>
+        <div className="metric-number-bold mono-num">{formatCurrency(totalDeductible)}</div>
+        <div className="metric-label-sub">Eligible write-offs (Schedule C)</div>
       </div>
     </section>
   );

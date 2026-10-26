@@ -33,44 +33,44 @@ export default function TransactionRow({
     }).format(val || 0);
   };
 
-  const getAmountClass = () => {
+  const getAmountColor = () => {
     switch (direction) {
       case 'INFLOW':
-        return 'amt-inflow';
+        return 'var(--accent-green)';
       case 'REFUND':
-        return 'amt-refund';
+        return '#0284c7';
       case 'TRANSFER':
-        return 'amt-transfer';
+        return 'var(--text-muted)';
       default:
-        return 'amt-outflow';
+        return 'var(--text-main)';
     }
   };
 
-  const getConfidenceBadge = () => {
-    const pct = Math.round((confidence || 0) * 100);
-    if (pct >= 85) {
-      return <span className="badge badge-verified mono-num">{pct}%</span>;
-    }
-    if (pct >= 50) {
-      return <span className="badge badge-review mono-num">{pct}%</span>;
-    }
-    return <span className="badge badge-personal mono-num">{pct}%</span>;
-  };
-
-  const getStatusBadge = () => {
+  const getStatusPill = () => {
     if (status === 'AUTO_VERIFIED') {
-      return <span className="badge badge-verified">Auto Verified</span>;
+      return <span className="pill-badge pill-green">Verified</span>;
     }
     if (status === 'MANUALLY_APPROVED') {
-      return <span className="badge badge-verified">Approved</span>;
+      return <span className="pill-badge pill-purple">Approved</span>;
     }
     if (status === 'PERSONAL') {
-      return <span className="badge badge-personal">Personal</span>;
+      return <span className="pill-badge" style={{ background: 'var(--accent-red-soft)', color: 'var(--accent-red)' }}>Personal</span>;
     }
-    return <span className="badge badge-review">Needs Review</span>;
+    return <span className="pill-badge pill-amber">Needs Review</span>;
   };
 
-  const handleCategoryChange = (e) => {
+  const getConfidencePill = () => {
+    const pct = Math.round((confidence || 0) * 100);
+    if (pct >= 85) {
+      return <span className="pill-badge pill-green mono-num">{pct}%</span>;
+    }
+    if (pct >= 50) {
+      return <span className="pill-badge pill-amber mono-num">{pct}%</span>;
+    }
+    return <span className="pill-badge pill-slate mono-num">{pct}%</span>;
+  };
+
+  const handleCategorySelect = (e) => {
     const newCategory = e.target.value;
     const catInfo = categories[newCategory] || {
       schedule_c_line: 'Pending',
@@ -80,7 +80,7 @@ export default function TransactionRow({
 
     const isDeductible = catInfo.tax_deductible && direction === 'OUTFLOW';
     const newDeductibleAmt = isDeductible
-      ? round2(amount * catInfo.deductible_percentage)
+      ? Math.round((amount * catInfo.deductible_percentage) * 100) / 100
       : 0.0;
 
     onUpdate({
@@ -105,7 +105,7 @@ export default function TransactionRow({
 
     const isDeductible = catInfo.tax_deductible && direction === 'OUTFLOW';
     const newDeductibleAmt = isDeductible
-      ? round2(amount * catInfo.deductible_percentage)
+      ? Math.round((amount * catInfo.deductible_percentage) * 100) / 100
       : 0.0;
 
     onUpdate({
@@ -117,32 +117,55 @@ export default function TransactionRow({
     });
   };
 
-  const round2 = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
+  // Avatar initials
+  const initials = (clean_merchant || 'TX').slice(0, 2).toUpperCase();
 
   return (
     <>
       <tr
-        className={`table-row ${needs_review ? 'row-needs-review' : ''}`}
+        className={`frosted-row ${needs_review ? 'row-flagged-amber' : ''}`}
         onClick={onToggleExpand}
+        style={{ cursor: 'pointer' }}
       >
-        <td className="mono-num" style={{ whiteSpace: 'nowrap', fontSize: '12px' }}>
+        <td className="mono-num" style={{ whiteSpace: 'nowrap', fontSize: '12px', color: 'var(--text-muted)' }}>
           {date}
         </td>
 
-        <td title={raw_description}>
-          <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{clean_merchant}</div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{id}</div>
+        <td>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'rgba(241, 245, 249, 0.9)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: '11px',
+                color: 'var(--accent-purple)',
+                border: '1px solid var(--glass-border)',
+              }}
+            >
+              {initials}
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{clean_merchant}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{id}</div>
+            </div>
+          </div>
         </td>
 
         <td className="mono-num">
-          <span className={getAmountClass()}>
+          <span style={{ fontWeight: 700, color: getAmountColor() }}>
             {direction === 'OUTFLOW' ? '-' : '+'}
             {formatCurrency(amount)}
           </span>
         </td>
 
         <td>
-          <span className="badge badge-neutral" style={{ fontSize: '10px' }}>
+          <span className="pill-badge pill-slate" style={{ fontSize: '10px' }}>
             {direction}
           </span>
         </td>
@@ -150,52 +173,52 @@ export default function TransactionRow({
         <td onClick={(e) => needs_review && e.stopPropagation()}>
           {needs_review ? (
             <select
-              className="category-select"
+              className="clean-select"
               value={category}
-              onChange={handleCategoryChange}
-              aria-label={`Select category for ${clean_merchant}`}
+              onChange={handleCategorySelect}
+              aria-label={`Assign category for ${clean_merchant}`}
             >
-              {Object.keys(categories).map((catName) => (
-                <option key={catName} value={catName}>
-                  {catName}
+              {Object.keys(categories).map((c) => (
+                <option key={c} value={c}>
+                  {c}
                 </option>
               ))}
             </select>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
               <span
                 style={{
                   width: '8px',
                   height: '8px',
-                  borderRadius: '2px',
-                  backgroundColor: categories[category]?.color || '#94a3b8',
+                  borderRadius: '50%',
+                  background: categories[category]?.color || '#8b5cf6',
                 }}
               />
-              <span style={{ fontWeight: 500 }}>{category}</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-sub)' }}>{category}</span>
             </div>
           )}
         </td>
 
-        <td>{getConfidenceBadge()}</td>
+        <td>{getConfidencePill()}</td>
 
-        <td>{getStatusBadge()}</td>
+        <td>{getStatusPill()}</td>
 
         <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
           {needs_review ? (
             <button
               type="button"
-              className="btn btn-approve"
+              className="btn-pill-primary"
+              style={{ padding: '4px 12px', fontSize: '11px' }}
               onClick={handleQuickApprove}
-              title="Confirm classification and approve write-off"
             >
               Approve
             </button>
           ) : (
             <button
               type="button"
-              className="btn btn-glass btn-sm"
+              className="btn-pill-glass"
+              style={{ padding: '4px 10px', fontSize: '11px' }}
               onClick={onToggleExpand}
-              style={{ padding: '3px 8px', fontSize: '11px' }}
             >
               {isExpanded ? 'Less' : 'Details'}
             </button>
@@ -203,37 +226,47 @@ export default function TransactionRow({
         </td>
       </tr>
 
-      {/* Expandable Audit Details Row */}
+      {/* Expanded Audit Card */}
       {isExpanded && (
         <tr>
-          <td colSpan="8" className="row-detail-cell">
-            <div className="detail-grid">
-              <div className="detail-item">
-                <strong>Raw Bank Description</strong>
-                <span title={raw_description}>{raw_description}</span>
+          <td colSpan="8" style={{ background: 'rgba(255, 255, 255, 0.95)', padding: '16px 20px', borderBottom: '1px solid rgba(226, 232, 240, 0.8)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', fontSize: '12px' }}>
+              <div>
+                <strong style={{ display: 'block', color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase' }}>
+                  Raw Bank Description
+                </strong>
+                <span className="mono-num" style={{ color: 'var(--text-main)' }}>{raw_description}</span>
               </div>
 
-              <div className="detail-item">
-                <strong>Schedule C Tax Line</strong>
-                <span>{schedule_c_line || 'N/A'}</span>
+              <div>
+                <strong style={{ display: 'block', color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase' }}>
+                  Schedule C Tax Line
+                </strong>
+                <span style={{ fontWeight: 600, color: 'var(--accent-purple)' }}>{schedule_c_line || 'N/A'}</span>
               </div>
 
-              <div className="detail-item">
-                <strong>Deductible Amount</strong>
-                <span>
+              <div>
+                <strong style={{ display: 'block', color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase' }}>
+                  Deductible Portion
+                </strong>
+                <span style={{ fontWeight: 600 }}>
                   {Math.round((deductible_percentage || 0) * 100)}% ({formatCurrency(deductible_amount)})
                 </span>
               </div>
 
-              <div className="detail-item">
-                <strong>Decision Rule</strong>
-                <span>{decision_rule || 'Deterministic rule pattern'}</span>
+              <div>
+                <strong style={{ display: 'block', color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase' }}>
+                  Decision Rule
+                </strong>
+                <span style={{ color: 'var(--text-sub)' }}>{decision_rule || 'Deterministic rule'}</span>
               </div>
 
               {review_reason && (
-                <div className="detail-item" style={{ gridColumn: '1 / -1' }}>
-                  <strong style={{ color: 'var(--accent-review)' }}>Review Reason</strong>
-                  <span style={{ color: 'var(--accent-review)' }}>{review_reason}</span>
+                <div style={{ gridColumn: '1 / -1', background: 'var(--accent-amber-soft)', padding: '8px 12px', borderRadius: '8px' }}>
+                  <strong style={{ color: 'var(--accent-amber)', fontSize: '11px', textTransform: 'uppercase' }}>
+                    Review Flag Reason
+                  </strong>
+                  <div style={{ color: 'var(--accent-amber)', fontWeight: 500 }}>{review_reason}</div>
                 </div>
               )}
             </div>

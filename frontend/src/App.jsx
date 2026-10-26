@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import TopNavbar from './components/TopNavbar';
 import FileUpload from './components/FileUpload';
 import TaxDashboard from './components/TaxDashboard';
-import CategoryChart from './components/CategoryChart';
+import OverviewChartCard from './components/OverviewChartCard';
+import SideStatusCards from './components/SideStatusCards';
 import CategoryFilter from './components/CategoryFilter';
 import TransactionTable from './components/TransactionTable';
-import ExportButton from './components/ExportButton';
 import { getCategories, recalculateSummary } from './utils/api';
 
 export default function App() {
@@ -13,10 +14,9 @@ export default function App() {
   const [summary, setSummary] = useState(null);
   const [categories, setCategories] = useState({});
   const [activeFilter, setActiveFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('Dashboard');
   const [warnings, setWarnings] = useState([]);
-  const [isRecalculating, setIsRecalculating] = useState(false);
 
-  // Load category definitions on mount
   useEffect(() => {
     getCategories()
       .then((catMap) => setCategories(catMap))
@@ -41,22 +41,60 @@ export default function App() {
 
   const handleTransactionsUpdate = async (updatedTxList) => {
     setTransactions(updatedTxList);
-    setIsRecalculating(true);
-
     try {
       const newSummary = await recalculateSummary(updatedTxList);
       setSummary(newSummary);
     } catch (err) {
       console.error('Recalculation error:', err);
-    } finally {
-      setIsRecalculating(false);
     }
+  };
+
+  const handleExportCsv = () => {
+    if (!transactions || transactions.length === 0) return;
+
+    const headers = [
+      'Date', 'Raw Description', 'Clean Merchant', 'Amount', 'Direction',
+      'Category', 'Tax Deductible', 'Deductible %', 'Deductible Amount',
+      'Confidence', 'Status', 'Schedule C Line', 'Review Reason'
+    ];
+
+    const escapeCsv = (str) => {
+      if (str === null || str === undefined) return '""';
+      const s = String(str).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows = transactions.map((t) => [
+      escapeCsv(t.date),
+      escapeCsv(t.raw_description),
+      escapeCsv(t.clean_merchant),
+      t.amount,
+      escapeCsv(t.direction),
+      escapeCsv(t.category),
+      t.tax_deductible ? 'YES' : 'NO',
+      `${Math.round((t.deductible_percentage || 0) * 100)}%`,
+      t.deductible_amount || 0.0,
+      `${Math.round((t.confidence || 0) * 100)}%`,
+      escapeCsv(t.status),
+      escapeCsv(t.schedule_c_line),
+      escapeCsv(t.review_reason || ''),
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${statementData?.filename || 'statement'}_tax_ledger.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const needsReviewCount = transactions.filter((t) => t.needs_review).length;
 
-  // Active category names with at least one transaction
-  const activeCategoryNames = React.useMemo(() => {
+  const activeCategoryNames = useMemo(() => {
     const set = new Set();
     transactions.forEach((t) => {
       if (t.category && t.category !== 'Needs Review') {
@@ -67,114 +105,80 @@ export default function App() {
   }, [transactions]);
 
   return (
-    <div className="app-layout">
-      {/* Frosted Glass Header */}
-      <header className="app-header">
-        <div className="header-container">
-          <div className="brand">
-            <div className="brand-icon">SC</div>
-            <div>
-              <div className="brand-title">Statement Categorizer</div>
-              <div className="brand-subtitle">IRS Schedule C Deductions • Freelance Tech</div>
+    <div className="dashboard-wrapper">
+      {/* Top Application Bar matching reference */}
+      <TopNavbar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onReset={handleReset}
+        hasData={Boolean(statementData)}
+      />
+
+      {!statementData ? (
+        <FileUpload onUploadComplete={handleUploadComplete} />
+      ) : (
+        <main>
+          {/* Welcome Header from Reference */}
+          <div className="welcome-banner">
+            <h1 className="welcome-title">Good morning, Consultant! 👋</h1>
+            <p className="welcome-subtitle">
+              Statement <strong style={{ color: 'var(--text-main)' }}>{statementData.filename}</strong> reconciled with {transactions.length} transactions.
+            </p>
+          </div>
+
+          {/* Warnings Banner */}
+          {warnings && warnings.length > 0 && (
+            <div className="warning-banner">
+              <div>
+                <strong>Notice:</strong> {warnings.join(' • ')}
+              </div>
+              <button
+                type="button"
+                onClick={() => setWarnings([])}
+                style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700 }}
+              >
+                ✕
+              </button>
             </div>
-          </div>
+          )}
 
-          <div className="header-actions">
-            {statementData && (
-              <>
-                <ExportButton
-                  transactions={transactions}
-                  defaultFilename={`${statementData.filename || 'statement'}_tax_categorized.csv`}
-                />
-                <button
-                  type="button"
-                  className="btn btn-glass"
-                  onClick={handleReset}
-                  title="Upload a different statement CSV"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                  Upload New
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+          {/* Top 4 Metrics Row */}
+          <TaxDashboard summary={summary} needsReviewCount={needsReviewCount} />
 
-      {/* Main Container */}
-      <main className="main-content" style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
-        {!statementData ? (
-          <FileUpload onUploadComplete={handleUploadComplete} />
-        ) : (
-          <div>
-            {/* Parser Warnings Banner if any */}
-            {warnings && warnings.length > 0 && (
-              <div className="warning-banner">
-                <div>
-                  <strong>Parser Notice:</strong> {warnings.join(' • ')}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setWarnings([])}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'inherit',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                  }}
-                  aria-label="Dismiss warning"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
+          {/* 2-Column Main Layout: Left Overview & Table, Right Status & Radial Gauge */}
+          <div className="main-two-columns">
+            {/* Left Column Stack */}
+            <div className="left-col-stack">
+              {/* Average Sales / Deduction Overview Card */}
+              <OverviewChartCard summary={summary} transactions={transactions} />
 
-            {/* Recalculating indicator */}
-            {isRecalculating && (
-              <div style={{ textAlign: 'right', fontSize: '12px', color: 'var(--primary)', marginBottom: '8px' }}>
-                Recalculating Schedule C totals...
-              </div>
-            )}
+              {/* Filter Pills */}
+              <CategoryFilter
+                categories={activeCategoryNames}
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+                needsReviewCount={needsReviewCount}
+                totalCount={transactions.length}
+              />
 
-            {/* Dashboard Metric Cards */}
-            <TaxDashboard summary={summary} needsReviewCount={needsReviewCount} />
+              {/* Transaction Ledger Table */}
+              <TransactionTable
+                transactions={transactions}
+                categories={categories}
+                filter={activeFilter}
+                onTransactionUpdate={handleTransactionsUpdate}
+              />
+            </div>
 
-            {/* Category Chart */}
-            {summary?.categories && <CategoryChart categories={summary.categories} />}
-
-            {/* Filter Bar */}
-            <CategoryFilter
-              categories={activeCategoryNames}
-              activeFilter={activeFilter}
-              onFilterChange={setActiveFilter}
-              needsReviewCount={needsReviewCount}
-              totalCount={transactions.length}
-            />
-
-            {/* Interactive Review Table */}
-            <TransactionTable
-              transactions={transactions}
-              categories={categories}
-              filter={activeFilter}
-              onTransactionUpdate={handleTransactionsUpdate}
+            {/* Right Column Stack */}
+            <SideStatusCards
+              summary={summary}
+              totalTransactions={transactions.length}
+              onExport={handleExportCsv}
             />
           </div>
-        )}
-      </main>
+        </main>
+      )}
     </div>
   );
 }
